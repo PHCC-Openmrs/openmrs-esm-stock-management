@@ -13,7 +13,7 @@ import {
 import { ArrowRight } from '@carbon/react/icons';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ErrorState } from '@openmrs/esm-framework';
+import { ErrorState, useSession } from '@openmrs/esm-framework';
 import { DATE_PICKER_CONTROL_FORMAT, DATE_PICKER_FORMAT, MAIN_STORE_LOCATION_TAG } from '../../../constants';
 import { type Party } from '../../../core/api/types/Party';
 import { type StockOperationDTO } from '../../../core/api/types/stockOperation/StockOperationDTO';
@@ -37,6 +37,7 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
   onNext,
 }) => {
   const { t } = useTranslation();
+  const { sessionLocation } = useSession();
   const operationTypePermision = useOperationTypePermisions(stockOperationType);
   const {
     destinationParties,
@@ -73,7 +74,8 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
       if (stockOperationType?.hasSource) {
         const shouldLockSource = sourceTags.length === 1 && sourceTags[0] === MAIN_STORE_LOCATION_TAG;
         if (shouldLockSource && sourceParties?.length) {
-          const party = sourceParties[0];
+          const loginLocationParty = sourceParties.find((p) => p.locationUuid === sessionLocation?.uuid);
+          const party = loginLocationParty ?? sourceParties[0];
           form.setValue('sourceUuid', party.uuid);
         }
       }
@@ -81,12 +83,22 @@ const BaseOperationDetailsFormStep: FC<BaseOperationDetailsFormStepProps> = ({
       if (stockOperationType?.hasDestination) {
         const shouldLockDestination = destinationTags.length === 1 && destinationTags[0] === MAIN_STORE_LOCATION_TAG;
         if (shouldLockDestination && destinationParties?.length) {
-          const party = destinationParties[0];
+          const loginLocationParty = destinationParties.find((p) => p.locationUuid === sessionLocation?.uuid);
+          const party = loginLocationParty ?? destinationParties[0];
           form.setValue('destinationUuid', party.uuid);
         }
       }
     }
-  }, [sourceParties, destinationParties, stockOperation, stockOperationType, form, destinationTags, sourceTags]);
+  }, [
+    sourceParties,
+    destinationParties,
+    stockOperation,
+    stockOperationType,
+    form,
+    destinationTags,
+    sourceTags,
+    sessionLocation,
+  ]);
 
   if (isPartiesLoading)
     return (
