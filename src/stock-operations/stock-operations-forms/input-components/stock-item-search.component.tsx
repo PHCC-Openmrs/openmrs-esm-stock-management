@@ -58,7 +58,7 @@ const StockItemSearch: React.FC<StockItemSearchProps> = ({ onSelectedItem }) => 
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      {searchTerm && stockItemsList?.length > 0 && (
+      {debouncedSearchTerm && stockItemsList?.length > 0 && (
         <div className={styles.searchResults}>
           {stockItemsList?.slice(0, 5).map((stockItem) => {
             const commonName = getCommonName(stockItem);

@@ -4,13 +4,12 @@ import { type UserFilterCriteria } from '../../../stock-lookups/stock-lookups.re
 import { ResourceRepresentation } from '../../../core/api/api';
 
 export function useFilterableStockItems(filter?: StockItemFilter) {
-  const [conceptFilter, setConceptFilter] = useState<UserFilterCriteria>(
-    filter || {
-      v: ResourceRepresentation.Default,
-      limit: 10,
-      startIndex: 0,
-    },
-  );
+  const [conceptFilter, setConceptFilter] = useState<UserFilterCriteria>({
+    v: ResourceRepresentation.Default,
+    limit: 10,
+    startIndex: 0,
+    ...filter,
+  });
 
   const {
     items: { results: stockItemsList },
