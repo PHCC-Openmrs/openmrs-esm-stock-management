@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ClickableTile, Search } from '@carbon/react';
 import { useTranslation } from 'react-i18next';
 import { useConfig, useDebounce } from '@openmrs/esm-framework';
@@ -40,6 +40,20 @@ const StockItemSearch: React.FC<StockItemSearchProps> = ({ onSelectedItem }) => 
     }
   }, [debouncedSearchTerm, setSearchString]);
 
+  // The backend `q` search on /stockmanagement/stockitem can match loosely (e.g. on individual
+  // words/numbers), returning unrelated items alongside real matches. Narrow those results down
+  // client-side to items that actually contain what was typed.
+  const matchingStockItems = useMemo(() => {
+    const term = debouncedSearchTerm?.toLocaleLowerCase().trim();
+    if (!term) {
+      return [];
+    }
+    return (stockItemsList ?? []).filter(
+      (item) =>
+        item?.drugName?.toLocaleLowerCase().includes(term) || item?.commonName?.toLocaleLowerCase().includes(term),
+    );
+  }, [debouncedSearchTerm, stockItemsList]);
+
   const handleOnSearchResultClick = (stockItem: StockItemDTO) => {
     onSelectedItem?.(stockItem);
     setSearchTerm('');
@@ -58,9 +72,9 @@ const StockItemSearch: React.FC<StockItemSearchProps> = ({ onSelectedItem }) => 
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
-      {debouncedSearchTerm && stockItemsList?.length > 0 && (
+      {debouncedSearchTerm && matchingStockItems.length > 0 && (
         <div className={styles.searchResults}>
-          {stockItemsList?.slice(0, 5).map((stockItem) => {
+          {matchingStockItems.slice(0, 5).map((stockItem) => {
             const commonName = getCommonName(stockItem);
             const drugName = getDrugName(stockItem);
             return (

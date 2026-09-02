@@ -6,7 +6,7 @@ import { ResourceRepresentation } from '../../../core/api/api';
 export function useFilterableStockItems(filter?: StockItemFilter) {
   const [conceptFilter, setConceptFilter] = useState<UserFilterCriteria>({
     v: ResourceRepresentation.Default,
-    limit: 10,
+    limit: 50,
     startIndex: 0,
     ...filter,
   });
@@ -19,7 +19,7 @@ export function useFilterableStockItems(filter?: StockItemFilter) {
   const [searchString, setSearchString] = useState(null);
 
   // Drug filter type
-  const [limit, setLimit] = useState(filter?.limit || 10);
+  const [limit, setLimit] = useState(filter?.limit || 50);
   const [representation, setRepresentation] = useState(filter?.v || ResourceRepresentation.Default);
 
   useEffect(() => {
